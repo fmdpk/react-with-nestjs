@@ -1,4 +1,5 @@
 import { useCallback, useReducer, useState } from 'react'
+import itemsJson from '../data/items.json'
 
 export type ItemStatus = 'pending' | 'in-progress' | 'completed'
 
@@ -34,27 +35,8 @@ type ItemsAction =
     }
   | { type: 'RESET_FORM' }
 
-const initialItems: Item[] = [
-  {
-    id: 1,
-    title: 'Sample Task 1',
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    createdUser: 'You',
-  },
-  {
-    id: 2,
-    title: 'Sample Task 2',
-    status: 'in-progress',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    createdUser: 'You',
-  },
-]
-
 const initialState: ItemsState = {
-  items: initialItems,
+  items: itemsJson as Item[],
   title: '',
   status: 'pending',
   editingId: null,
@@ -145,6 +127,7 @@ export function useItemsReducer() {
   }, [])
 
   const deleteItem = useCallback((id: number) => {
+    if (!confirm('Are you sure you want to delete this item?')) return
     dispatch({ type: 'DELETE_ITEM', payload: id })
   }, [])
 

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "title": "Sample Task 1",
+    "status": "pending",
+    "createdAt": "2026-06-11T00:00:00.000Z",
+    "updatedAt": "2026-06-11T00:00:00.000Z",
+    "createdUser": "You"
+  },
+  {
+    "id": 2,
+    "title": "Sample Task 2",
+    "status": "in-progress",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "createdUser": "You"
+  }
+]
