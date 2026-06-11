@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react'
 import { protectedApi } from '../utils/api'
 import { useAuth } from '../hooks/useAuth'
 
+interface Profile {
+  UserId: number
+  email: string
+}
+
 export default function Dashboard() {
-  const { user, logout } = useAuth()
-  const [profile, setProfile] = useState<any>(null)
+  const { user } = useAuth()
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -35,13 +40,15 @@ export default function Dashboard() {
           </div>
         ) : (
           <div>
-            <p className='text-xl'>
-              Welcome, <span className='font-semibold'>{user?.email}</span>
-            </p>
             {profile && (
-              <pre className='mt-4 bg-gray-100 p-4 rounded'>
-                {JSON.stringify(profile, null, 2)}
-              </pre>
+              <>
+                <p className='text-xl'>
+                  Welcome, <span className='font-semibold'>{user?.email}</span>
+                </p>
+                <pre className='mt-4 bg-gray-100 p-4 rounded'>
+                  {JSON.stringify(profile, null, 2)}
+                </pre>
+              </>
             )}
           </div>
         )}
