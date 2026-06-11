@@ -1,88 +1,74 @@
-import { useState, useEffect } from 'react'
-import api from '../utils/api'
+import { useReducer, useState } from 'react'
+import type { Item } from '../items-reducer/items-interface'
+import { initialState, itemsReducer } from '../items-reducer/items-reducer'
 
-interface Item {
-  id: number
-  title: string
-  status: 'pending' | 'in-progress' | 'completed'
-  createdAt: string
-  updatedAt: string
-  createdUser: string
-}
+export default function ItemsReducer() {
+  const [state, dispatch] = useReducer(itemsReducer, initialState)
+  const [nextId, setNextId] = useState(3)
 
-export default function Items() {
-  const [items, setItems] = useState<Item[]>([])
-  const [title, setTitle] = useState('')
-  const [status, setStatus] = useState<'pending' | 'in-progress' | 'completed'>(
-    'pending',
-  )
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  // Fetch items function (defined inside component)
-  const fetchItems = async () => {
-    setLoading(true)
-    try {
-      const res = await api.get('/items')
-      setItems(res.data)
-    } catch (err) {
-      console.error('Failed to fetch items:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Initial load - using empty dependency array + flag to prevent multiple calls
-  useEffect(() => {
-    const fetch = async () => {
-      fetchItems()
-    }
-
-    fetch()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // ← Empty array is intentional here
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (!state.title.trim()) return
 
-    try {
-      if (editingId !== null) {
-        await api.put(`/items/${editingId}`, { title, status })
-      } else {
-        await api.post('/items', { title, status })
+    if (state.editingId !== null) {
+      // Update existing item
+      const itemToUpdate = state.items.find(
+        (item) => item.id === state.editingId,
+      )
+      if (itemToUpdate) {
+        dispatch({
+          type: 'UPDATE_ITEM',
+          payload: {
+            ...itemToUpdate,
+            title: state.title,
+            status: state.status,
+            updatedAt: new Date().toISOString(),
+          },
+        })
       }
-
-      setTitle('')
-      setEditingId(null)
-      await fetchItems() // Refresh list after create/update
-    } catch (err) {
-      console.error(err)
-      alert('Operation failed. Please try again.')
+    } else {
+      // Add new item
+      const newItem: Item = {
+        id: nextId,
+        title: state.title,
+        status: state.status,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdUser: 'You',
+      }
+      dispatch({ type: 'ADD_ITEM', payload: newItem })
+      setNextId(nextId + 1)
     }
+
+    dispatch({ type: 'RESET_FORM' })
   }
 
   const handleEdit = (item: Item) => {
-    setTitle(item.title)
-    setStatus(item.status)
-    setEditingId(item.id)
+    dispatch({
+      type: 'SET_FORM_DATA',
+      payload: {
+        title: item.title,
+        status: item.status,
+        editingId: item.id,
+      },
+    })
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (id: number) => {
     if (!confirm('Are you sure you want to delete this item?')) return
+    dispatch({ type: 'DELETE_ITEM', payload: id })
+  }
 
-    try {
-      await api.delete(`/items/${id}`)
-      await fetchItems()
-    } catch (err) {
-      console.error(err)
-    }
+  const handleCancel = () => {
+    dispatch({ type: 'RESET_FORM' })
   }
 
   return (
     <div className='w-full bg-white rounded-2xl shadow-sm p-10'>
       <div>
-        <h1 className='text-3xl font-bold mb-8'>Items Management</h1>
+        <h1 className='text-3xl font-bold mb-8'>
+          Items Management (Local State)
+        </h1>
       </div>
 
       {/* Form */}
@@ -92,16 +78,26 @@ export default function Items() {
       >
         <input
           type='text'
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={state.title}
+          onChange={(e) =>
+            dispatch({ type: 'SET_TITLE', payload: e.target.value })
+          }
           placeholder='Item Title'
           className='border border-gray-300 p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
           required
         />
 
         <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as any)}
+          value={state.status}
+          onChange={(e) =>
+            dispatch({
+              type: 'SET_STATUS',
+              payload: e.target.value as
+                | 'pending'
+                | 'in-progress'
+                | 'completed',
+            })
+          }
           className='border border-gray-300 p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
         >
           <option value='pending'>Pending</option>
@@ -114,16 +110,13 @@ export default function Items() {
             type='submit'
             className='bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition'
           >
-            {editingId ? 'Update Item' : 'Create Item'}
+            {state.editingId ? 'Update Item' : 'Create Item'}
           </button>
 
-          {editingId && (
+          {state.editingId && (
             <button
               type='button'
-              onClick={() => {
-                setEditingId(null)
-                setTitle('')
-              }}
+              onClick={handleCancel}
               className='bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition'
             >
               Cancel
@@ -134,16 +127,12 @@ export default function Items() {
 
       {/* Items List */}
       <div className='bg-white rounded-xl shadow'>
-        {loading ? (
-          <div className='p-12 text-center'>
-            <div className='w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
-          </div>
-        ) : items.length === 0 ? (
+        {state.items.length === 0 ? (
           <p className='p-12 text-center text-gray-500'>
             No items found. Create your first item above.
           </p>
         ) : (
-          items.map((item) => (
+          state.items.map((item) => (
             <div
               key={item.id}
               className='border-b last:border-b-0 p-6 flex justify-between items-start hover:bg-gray-50'

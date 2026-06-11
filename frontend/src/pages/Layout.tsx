@@ -10,7 +10,7 @@ export default function Layout() {
   return (
     <div className='min-h-screen bg-gray-50'>
       {/* Navbar */}
-      <nav className='bg-white border-b shadow-sm sticky top-0 z-50'>
+      <nav className='bg-white shadow-sm sticky top-0 z-50'>
         <div className='max-w-7xl mx-auto px-6'>
           <div className='flex justify-between items-center h-16'>
             {/* Logo / Brand */}
@@ -43,6 +43,16 @@ export default function Layout() {
                 }`}
               >
                 Items
+              </Link>
+              <Link
+                to='/items-reducer'
+                className={`font-medium transition ${
+                  isActive('/items-reducer')
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Items Reducer
               </Link>
             </div>
 
