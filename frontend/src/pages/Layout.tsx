@@ -54,6 +54,16 @@ export default function Layout() {
               >
                 Items Reducer
               </Link>
+              <Link
+                to='/items-context'
+                className={`font-medium transition ${
+                  isActive('/items-context')
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Items Context
+              </Link>
             </div>
 
             {/* User Info & Logout */}

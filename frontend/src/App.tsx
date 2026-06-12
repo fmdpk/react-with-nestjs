@@ -14,6 +14,8 @@ import './App.css'
 import { ProtectedLogin } from './auth/ProtectedLogin'
 import Layout from './pages/Layout'
 import ItemsReducer from './pages/ItemsReducer'
+import ItemsContextPage from './pages/ItemsContextPage'
+import { ItemsProvider } from './context/ItemsProvider'
 
 function App() {
   return (
@@ -26,6 +28,14 @@ function App() {
               <Route path='/dashboard' element={<Dashboard />} />
               <Route path='/items' element={<Items />} />
               <Route path='/items-reducer' element={<ItemsReducer />} />
+              <Route
+                path='/items-context'
+                element={
+                  <ItemsProvider>
+                    <ItemsContextPage />
+                  </ItemsProvider>
+                }
+              />
             </Route>
           </Route>
           <Route element={<ProtectedLogin />}>
