@@ -1,5 +1,6 @@
 import { useCallback, useReducer, useState } from 'react'
 import itemsJson from '../data/items.json'
+import { createNewItem } from '../utils/newItem'
 
 export type ItemStatus = 'pending' | 'in-progress' | 'completed'
 
@@ -87,19 +88,6 @@ function itemsReducer(state: ItemsState, action: ItemsAction): ItemsState {
       }
     default:
       return state
-  }
-}
-
-function createNewItem(id: number, title: string, status: ItemStatus): Item {
-  const timestamp = new Date().toISOString()
-
-  return {
-    id,
-    title,
-    status,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    createdUser: 'You',
   }
 }
 
